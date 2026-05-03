@@ -1,0 +1,24 @@
+# 音频处理
+librosa>=0.10.0
+pydub>=0.25.1
+soundfile>=0.12.1
+sounddevice>=0.4.6
+
+# 数值计算
+numpy>=1.24.0
+pandas>=2.0.0
+
+# GUI
+PyQt6>=6.4.0
+
+# BPM识别
+mixxx-analyzer>=0.1.2
+
+# 配置文件
+pyyaml>=6.0
+
+# 变速处理（可选，Windows可能需要手动安装）
+# soundstretch>=1.0.0; sys_platform != "win32"
+
+# 打包工具（可选）
+# pyinstaller>=5.0

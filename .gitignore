@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 项目输出文件（不应该提交到git）
+audio_input/*
+!audio_input/.gitkeep
+audio_output/*
+!audio_output/.gitkeep
+data/*.json
+data/*.csv
+!data/.gitkeep
+
+# 截图（可选，如果截图太大可以不提交）
+screenshots/*.png
+screenshots/*.jpg
+screenshots/*.gif
+
+# 临时文件
+*.tmp
+*.temp
+temp/
+tmp/
+
+# 系统文件
+.DS_Store
+Thumbs.db

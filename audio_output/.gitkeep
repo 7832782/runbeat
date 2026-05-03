@@ -1,0 +1,5 @@
+# 此目录用于存放输出音频文件
+# 子目录：
+# - metronome/: 节拍器输出
+# - shifted_songs/: 变速后音频
+# - final_mix/: 最终混音
