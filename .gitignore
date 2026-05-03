@@ -48,6 +48,11 @@ screenshots/*.gif
 
 # 临时文件
 *.tmp
+
+# 打包脚本（发布用，不提交）
+build_exe.py
+build_simple.py
+runtime_hook.py
 *.temp
 temp/
 tmp/
