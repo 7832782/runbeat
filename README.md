@@ -16,14 +16,10 @@ RunBeat 是一个基于Python的智能跑步音乐生成系统，将任意音频
 - 🔗 **Audacity集成**：支持专业音频编辑软件协作
 
 ## 演示截图
-
-> 建议添加GUI界面截图，展示：
->
-> - 主界面概览
-> - 波形编辑界面
-> - 处理流程示意
-
-## 功能特性
+- 主界面概览
+![alt text](screenshots/image1.png)
+- 波形编辑界面
+![alt text](screenshots/image2.png)
 
 ## 功能特性
 
