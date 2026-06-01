@@ -4,18 +4,19 @@
 Tab 3 - 节拍器生成标签页
 
 功能:
-    1. 设置节拍器参数: BPM、时长、拍号、强/弱拍频率
+    1. 设置节拍器参数: BPM、时长、拍号、音色类型、强/弱拍 MIDI 音高、Swing
     2. 检测变速后歌曲的总时长（自动遍历 shifted_songs/ 文件夹）
     3. 生成建议时长（总时长 + 每首歌 5 秒空余）
     4. 生成节拍器 WAV 文件到 audio_output/metronome/metronome_{bpm}.wav
 
 音色说明:
-    - 强拍（每小节第 1 拍）: 默认 1000Hz，音量 0.8，用于节拍对齐参考
-    - 弱拍（其余拍）: 默认 800Hz，音量 0.5
-    - 使用指数衰减正弦波模拟自然的"嗒"声
+    - 基于 Audacity Rhythm Track 插件 1:1 复刻合成引擎
+    - 8 种音色: 节拍器拍 / 砰(短) / 砰(长) / 牛铃 / 共鸣噪音 / 咔嚓噪音 / 滴(短) / 滴(长)
+    - 核心算法: 白噪声+LCG、lowpass2/highpass8 双极点滤波、JC 混响、PWEV/PWL/PWLV 包络
+    - 详情: modules/metronome_generator.py
 
 依赖:
-    modules/metronome_generator.py → MetronomeGenerator, MetronomeConfig
+    modules/metronome_generator.py → MetronomeGenerator, MetronomeConfig, ClickType
 """
 
 import os
