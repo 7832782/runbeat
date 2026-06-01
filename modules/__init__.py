@@ -10,9 +10,11 @@ RunBeat 核心模块包 (Modules)
     特性: 支持断点续传、多位置采样、批量分析
 
 模块2 - metronome_generator.py  节拍器音频生成
-    输入: 目标 BPM、时长、拍号、强/弱拍音色参数
+    输入: 目标 BPM、拍号、音色类型、强/弱拍 MIDI 音高、Swing、小节数
     输出: audio_output/metronome/metronome_{bpm}.wav
-    算法: 指数衰减正弦波，强拍(1000Hz)与弱拍(800Hz)音色区分
+    算法: 1:1 翻译 Nyquist 合成引擎 — lowpass2/highpass8 滤波、JC 混响、
+          PWEV/PWL/PWLV 包络、LCG 白噪声、三角波环形调制、Bessel 根谐波
+    音色: 节拍器拍 / 砰(短) / 砰(长) / 牛铃 / 共鸣噪音 / 咔嚓噪音 / 滴(短) / 滴(长)
 
 模块3 - tempo_shifter.py  变速不变调处理
     输入: 原始音频 + song_bpm_list.json + 目标 BPM
