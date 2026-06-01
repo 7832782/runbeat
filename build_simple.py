@@ -1,14 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RunBeat 简单打包脚本
+RunBeat PyInstaller 打包脚本（简化版）
+
+相比 build_exe.py 的简化版本，hidden-imports 更少，打包速度更快。
 
 使用方法:
     1. 安装 PyInstaller: pip install pyinstaller
     2. 运行: python build_simple.py
     3. 等待打包完成
-    
-输出: dist/RunBeat/ 文件夹
+
+参数说明:
+    --windowed    GUI 模式，不显示控制台窗口
+    --onedir      打包为目录（启动更快，推荐）
+    --clean       清理 PyInstaller 缓存
+    --noconfirm   跳过确认提示，覆盖已有输出
+
+输出:
+    dist/RunBeat/ 文件夹，包含 RunBeat.exe 和所有依赖
+
+与 build_exe.py 的区别:
+    - hidden-imports 更少（仅 PyQt6.sip 和 numpy.core._dtype_ctypes）
+    - 无运行时钩子
+    - 无额外文件复制和批处理文件生成
+    - 打包更快但可能缺少某些隐式依赖
 """
 
 import os

@@ -1,22 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-模块1: 批量音频导入与BPM识别
+模块1: 批量音频 BPM 识别 (batch_bpm_detector.py)
 
-支持两种检测方法:
-1. librosa - 传统算法，速度快，无需额外依赖
-2. mixxx - 基于Mixxx分析引擎，更快更准
+批量分析音频文件夹，检测每首歌的原始 BPM（每分钟节拍数）。
 
-输入: 音频文件夹路径（支持.mp3/.wav/.flac/.m4a/.ogg/.aac）
+输入:
+    音频文件夹路径（支持 .mp3 / .wav / .flac / .m4a / .ogg / .aac）
+
 输出:
-    1. 控制台打印「歌曲名 - 识别BPM」列表
-    2. 保存为 song_bpm_list.json
-       格式: [{"file_path": "xxx", "file_name": "xxx", "original_bpm": 120, "confidence": 0.85}]
+    data/song_bpm_list.json
+    格式: [{"file_path": "...", "file_name": "...", "original_bpm": 120.5, "confidence": 0.85, ...}]
+
+两种检测方法:
+    1. librosa — 纯 Python 实现，无需额外依赖
+       在音频的不同位置采样多次，取中位数作为最终 BPM
+       置信度 = 1 - std/20（多次采样结果越一致，置信度越高）
+       参数: num_samples（采样次数，默认 3）、sample_duration（每次采样时长，默认 30s）
+
+    2. mixxx — 基于 Mixxx DJ 软件分析引擎，更快更准
+       使用 mixxx-analyzer 库，支持批量分析模式
+       置信度默认为 1.0（可配合 beatgrid 信息做更精确判断）
+       额外输出: key（调性）、camelot（Camelot 记谱）
 
 特性:
-    - 支持断点续传（跳过已识别歌曲）
-    - 标注识别置信度
-    - 支持批量处理
+    - 断点续传: 自动跳过已在 JSON 中的歌曲（通过 skip_existing 控制）
+    - 置信度标注: 方便判断检测结果是否可靠
+    - 批量加速: mixxx 支持 analyze_many() 一次分析多个文件
+
+类和数据结构:
+    BPMAnalysisResult   dataclass — BPM 分析结果
+    BPMDetector         抽象基类 — 定义 analyze() 接口
+    LibrosaBPMDetector  librosa 实现 — 多点采样 + 中位数
+    MixxxBPMDetector    mixxx 实现 — 支持批量分析
+    BatchBPMDetector    批量检测编排器 — 文件夹遍历 + 结果管理 + CLI
 """
 
 import os

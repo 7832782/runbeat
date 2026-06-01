@@ -1,10 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-工作流自动化标签页
+Tab - 一键工作流标签页
 
-一键完成整个流程：
-BPM识别 -> 变速处理 -> 混音
+自动串联所有处理步骤，无需手动切换标签页。
+
+执行流程（WorkflowThread）:
+    Step 1 - BPM识别:  使用 BatchBPMDetector 分析 audio_input/ 中所有音频
+    Step 2 - 变速处理:  使用 TempoShifter 将所有歌曲变速到目标 BPM
+    Step 3 - 节拍器生成: 使用 MetronomeGenerator 生成 1 小时节拍器（如不存在则跳过）
+    Step 4 - 首拍对齐:  使用 FirstBeatDetector 自动检测每首歌首拍
+    Step 5 - 混音:      使用 AudioMixer.mix_with_beat_alignment() 首拍对齐混音
+
+特性:
+    - 每步执行状态实时显示（等待中 / 完成 / 失败）
+    - 进度条可视化
+    - 支持随时停止
+    - 完成后可一键清理中间缓存文件
+
+类:
+    WorkflowThread  QThread 子类，在后台顺序执行 5 个步骤
+    WorkflowTab     QWidget，提供参数配置和进度监控 UI
 """
 
 import json

@@ -1,17 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-首拍识别模块
+模块5: 首拍识别与对齐管理 (beat_detector.py)
 
-功能：
-1. 自动检测音频的第一个重拍（首拍）位置
-2. 使用 onset detection 和 beat tracking 算法
-3. 支持手动微调时间戳
+功能:
+    1. 自动检测音频文件的第一个重拍（首拍）位置
+    2. 持久化管理多首歌曲的首拍时间戳
+    3. 为混音模块提供对齐计算（歌曲首拍 → 节拍器重拍）
 
-算法：
-- 使用 librosa.onset.onset_detect 检测 onset 点
-- 结合 librosa.beat.beat_track 找到节拍位置
-- 取第一个强 onset 作为首拍候选
+输入:
+    变速后的音频文件路径
+
+输出:
+    data/beat_alignments.json — 持久化的首拍时间戳存储
+
+检测算法:
+    1. 加载音频前 15 秒（preview_duration，可配置）
+    2. 使用 librosa.onset.onset_detect() 检测音符开始点（onset）
+    3. 使用 librosa.beat.beat_track() 检测节拍位置（beat）
+    4. 综合判断第一个重拍:
+       - 找到第一个 onset 和与其最接近的 beat
+       - 如果两者在 100ms 内，取平均值（说明是可靠的重拍）
+       - 否则回退到第一个 onset
+    5. 置信度评估: 基于首拍位置的 onset 强度与全局最大强度的比值
+
+类和数据结构:
+    BeatDetectionResult      dataclass — 单首歌曲的检测结果
+    FirstBeatDetector        首拍检测器 — 分析音频，返回首拍时间
+    BeatAlignmentManager     对齐管理器 — JSON 持久化存储，支持读写删
+
+在混音中的作用:
+    混音模块通过 BeatAlignmentManager 获取每首歌的首拍时间戳，
+    计算歌曲应该在什么时间开始播放，使其首拍精确对齐到节拍器的重拍位置。
 """
 
 import os

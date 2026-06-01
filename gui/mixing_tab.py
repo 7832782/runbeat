@@ -1,7 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-混音标签页
+Tab 5 - 混音标签页
+
+功能:
+    1. 设置混音参数: 目标响度（dBFS）、节拍器 BPM、节拍器音量
+    2. 导出对齐信息 CSV（data/alignment_detail_{timestamp}.csv）
+       包含: 每首歌的首拍时间、开始播放时间、结束时间、节拍器重拍标记
+       可用 tools/auto_mix.py 在 Audacity 中导入此 CSV
+    3. 执行混音: 首拍对齐 + 响度归一化 + 可选节拍器叠加
+       输出: audio_output/final_mix/running_mix.wav
+
+首拍对齐策略:
+    - 第一首歌从 0 秒开始，其首拍作为节拍器参考起点
+    - 后续歌曲的首拍对齐到节拍器的下一个重拍（每 4 拍 = 1 小节）
+    - 自动检测重叠：如果下一首歌会与当前歌曲重叠，自动推迟到下下个重拍
+
+依赖:
+    modules/audio_mixer.py → AudioMixer, MixConfig
+    modules/beat_detector.py → BeatAlignmentManager
 """
 
 import os

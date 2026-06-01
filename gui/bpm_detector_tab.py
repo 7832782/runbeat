@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-BPM识别标签页
+Tab 1 - BPM 识别标签页
+
+功能:
+    1. 选择 BPM 检测方法: mixxx（高精度，需额外安装）或 librosa（纯 Python 回退）
+    2. 批量分析 audio_input/ 中的所有音频文件
+    3. 以表格展示结果: 文件名 / BPM / 检测方法 / 置信度
+    4. 双击 BPM 单元格可手动修正数值（自动保存到 data/song_bpm_list.json）
+    5. 自动加载 file_mapping.json，将临时文件名还原为原始文件名显示
+
+使用流程:
+    先在 Tab 0（准备音频）中导入文件 → 切换到本标签页 → 点击"开始识别BPM"
+
+依赖:
+    modules/batch_bpm_detector.py → BatchBPMDetector
+    data/file_mapping.json（可选，用于文件名还原）
 """
 
 import os

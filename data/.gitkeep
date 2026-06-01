@@ -1,4 +1,0 @@
-# 此目录用于存放数据文件
-# - song_bpm_list.json: BPM识别结果
-# - file_mapping.json: 文件名映射
-# - beat_alignments.json: 首拍对齐数据

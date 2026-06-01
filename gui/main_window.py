@@ -1,10 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RunBeat GUI - PyQt6 图形界面
+RunBeat GUI 主窗口 (MainWindow)
 
-整合所有模块的工作流：
-1. BPM识别 -> 2. 节拍器生成 -> 3. 变速处理 -> 4. 混音
+基于 PyQt6 的桌面应用主界面，负责：
+1. 创建 QTabWidget 容器，按顺序加载 7 个功能标签页（Tab 0-5 + 一键工作流）
+2. 提供通用日志面板（QTextEdit）和状态栏
+3. 管理全局样式（Fusion 主题 + Microsoft YaHei 字体）
+4. 协调跨标签页通信（如 BPM 识别完成后自动刷新变速标签页的歌曲列表）
+
+标签页加载策略:
+    每个标签页通过 try/except 导入，即使某个模块缺失也不会导致整个应用崩溃
+
+类:
+    WorkerThread  通用后台工作线程，避免阻塞 UI
+    MainWindow    QMainWindow 主窗口
+
+完整工作流:
+    Tab 0 准备音频 → Tab 1 BPM识别 → Tab 2 变速处理
+    → Tab 3 节拍器生成 → Tab 4 首拍对齐 → Tab 5 混音
+    或使用"一键工作流"标签页自动串联所有步骤
 """
 
 import sys

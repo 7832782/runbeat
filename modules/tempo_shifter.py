@@ -1,25 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-模块3: 变速不变调处理
+模块3: 变速不变调处理 (tempo_shifter.py)
 
-功能: 将单首音频从原生BPM变速到目标BPM，保持音调不变
+将音频从原始 BPM 变速到目标 BPM，保持音调不变（时间拉伸，非重采样）。
 
 输入:
-    - 音频文件路径
-    - 原始BPM (从 song_bpm_list.json 读取)
-    - 目标BPM (用户输入)
+    - 音频文件 + 原始 BPM（从 data/song_bpm_list.json 读取）
+    - 目标 BPM（用户设定，如 180）
 
 输出:
-    - {原文件名}_{目标bpm}bpm.wav (保存变速后的音频)
+    audio_output/shifted_songs/{原文件名}_{实际BPM}bpm.wav
 
-实现策略:
-    1. 优先使用 soundstretch 命令行工具 (音质更好)
-    2. 如果 soundstretch 不可用，使用 librosa.effects.time_stretch
+实现策略（按优先级）:
+    1. soundstretch CLI — 专业音频时间拉伸工具，基于相位声码器，音质最好
+    2. librosa.effects.time_stretch — Python 库实现，音质略逊但无需额外安装
 
 变速比例计算:
     rate = 目标BPM / 原始BPM
-    例如: 原始120BPM → 目标180BPM, rate = 1.5 (加速50%)
+    例: 原 120BPM → 目标 180BPM → rate = 1.5 (加速 50%，时长变短)
+
+两种模式:
+    严格模式 (strict_mode=True):
+        直接变速到目标 BPM，不管变化幅度多大
+        例: 原 95 → 目标 180，rate = 1.89 (加速 89%，音质可能受损)
+
+    非严格模式 (strict_mode=False):
+        找目标 BPM 的因数/倍数中最接近原始 BPM 的值
+        例: 原 95 → 目标 180 → 候选: [180/2=90, 180/3=60, 180/4=45, 180]
+        → 选 90（95 到 90 变化最小），rate = 0.95
+        优势: 变化幅度最小，音质损失最低
+
+类和数据结构:
+    TempoShiftResult  dataclass — 单首歌曲的处理结果
+    TempoShifter      变速处理器 — 单文件/批量处理、CLI 入口
 """
 
 import os

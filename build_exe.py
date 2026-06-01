@@ -1,14 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RunBeat 打包脚本
+RunBeat PyInstaller 打包脚本（完整版）
 
-使用 PyInstaller 将 RunBeat 打包成独立的 Windows 可执行文件。
+使用 PyInstaller 将 RunBeat 打包成独立的 Windows 可执行文件（onedir 模式）。
+
+功能:
+    1. 清理旧构建文件（build/, dist/, *.spec）
+    2. 自动检测并安装 PyInstaller
+    3. 执行打包（--onedir 模式，包含所有数据目录和隐藏导入）
+    4. 复制额外文件（README.md, requirements.txt）
+    5. 创建启动批处理文件（启动 RunBeat.bat）
 
 使用方法:
     python build_exe.py
 
-打包完成后，可执行文件位于 dist/RunBeat/ 目录
+打包完成后:
+    可执行文件: dist/RunBeat/RunBeat.exe
+    运行方式: 双击"启动 RunBeat.bat"或直接运行 RunBeat.exe
+
+注意:
+    - 首次运行可能需要等待解压（PyInstaller 会将文件解压到临时目录）
+    - 目标电脑需安装 FFmpeg（用于音频格式转换）
+    - 完整版包含所有 hidden-imports，打包体积较大但兼容性更好
 """
 
 import os

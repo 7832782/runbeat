@@ -1,19 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Audacity 自动混音脚本
+Audacity 自动混音编排脚本 (tools/auto_mix.py)
 
-根据 RunBeat 导出的对齐信息 CSV 文件，自动在 Audacity 中导入并排列音频轨道。
+根据 RunBeat 导出的对齐信息 CSV 文件，自动在 Audacity 中创建多轨道工程。
+每条轨道通过 ffmpeg adelay 滤镜添加前导静音，使其精确对齐到目标时间点。
 
-使用方法：
-    1. 在 RunBeat 中导出对齐信息（生成 CSV 文件）
-    2. 打开 Audacity 并启用 mod-script-pipe
-    3. 运行: python auto_mix.py
+使用方法:
+    1. 在 RunBeat 的 Tab 5（混音）中点击"导出对齐信息"→ 生成 data/alignment_detail_*.csv
+    2. 打开 Audacity，确保已启用 mod-script-pipe
+       （编辑 → 偏好设置 → 模块 → mod-script-pipe: 启用）
+    3. 运行: python tools/auto_mix.py
 
-依赖：
-    - Audacity (已安装 mod-script-pipe 模块)
-    - FFmpeg
-    - pipeclient.py
+工作流程:
+    1. 自动查找 data/ 中最新的 alignment_detail_*.csv
+    2. 解析 CSV 获取: BPM、目标响度、节拍器音量、每首歌的开始播放时间
+    3. 连接 Audacity 命名管道（通过 pipeclient.py）
+    4. 新建工程
+    5. 处理节拍器: 用 ffmpeg adelay 添加前导静音 → 导入 Audacity → 调整音量
+    6. 逐首处理歌曲: 用 ffmpeg adelay 添加前导静音 → 导入为新轨道
+    7. 所有轨道对齐完成后，用户在 Audacity 中检查并手动导出
+
+技术细节:
+    - ffmpeg adelay 滤镜: 在音频最前面插入静音，不修改原始音频数据
+    - adelay 格式: adelay=delay_ms|delay_ms:all=1（立体声两个声道分别延迟）
+    - 每个文件创建独立的处理后副本到临时文件夹
+
+依赖:
+    - Audacity（启用 mod-script-pipe 模块）
+    - FFmpeg（命令行可用）
+    - pipeclient.py（同目录下的 Audacity 命名管道客户端）
 
 作者: RunBeat Project
 """

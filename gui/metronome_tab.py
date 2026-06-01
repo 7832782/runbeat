@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-节拍器生成标签页
+Tab 3 - 节拍器生成标签页
+
+功能:
+    1. 设置节拍器参数: BPM、时长、拍号、强/弱拍频率
+    2. 检测变速后歌曲的总时长（自动遍历 shifted_songs/ 文件夹）
+    3. 生成建议时长（总时长 + 每首歌 5 秒空余）
+    4. 生成节拍器 WAV 文件到 audio_output/metronome/metronome_{bpm}.wav
+
+音色说明:
+    - 强拍（每小节第 1 拍）: 默认 1000Hz，音量 0.8，用于节拍对齐参考
+    - 弱拍（其余拍）: 默认 800Hz，音量 0.5
+    - 使用指数衰减正弦波模拟自然的"嗒"声
+
+依赖:
+    modules/metronome_generator.py → MetronomeGenerator, MetronomeConfig
 """
 
 import os
@@ -9,7 +23,7 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QGroupBox, QMessageBox, QSpinBox
+    QGroupBox, QMessageBox, QSpinBox, QComboBox, QDoubleSpinBox
 )
 from PyQt6.QtCore import QThread, pyqtSignal
 
@@ -80,21 +94,52 @@ class MetronomeTab(QWidget):
         beat_layout.addStretch()
         params_layout.addLayout(beat_layout)
 
-        # 音色设置
-        tone_layout = QHBoxLayout()
-        tone_layout.addWidget(QLabel("强拍频率(Hz):"))
-        self.strong_freq = QSpinBox()
-        self.strong_freq.setRange(200, 2000)
-        self.strong_freq.setValue(1000)
-        tone_layout.addWidget(self.strong_freq)
+        # 音色类型选择
+        click_type_layout = QHBoxLayout()
+        click_type_layout.addWidget(QLabel("拍声音色:"))
+        self.click_type_combo = QComboBox()
+        self.click_type_map = {
+            "节拍器拍": 0,
+            "砰 (短)": 1,
+            "砰 (长)": 2,
+            "牛铃": 3,
+            "共鸣噪音": 4,
+            "咔嚓噪音": 5,
+            "滴 (短)": 6,
+            "滴 (长)": 7,
+        }
+        self.click_type_combo.addItems(list(self.click_type_map.keys()))
+        self.click_type_combo.setCurrentText("节拍器拍")
+        click_type_layout.addWidget(self.click_type_combo)
+        click_type_layout.addStretch()
+        params_layout.addLayout(click_type_layout)
 
-        tone_layout.addWidget(QLabel("弱拍频率(Hz):"))
-        self.weak_freq = QSpinBox()
-        self.weak_freq.setRange(200, 2000)
-        self.weak_freq.setValue(800)
-        tone_layout.addWidget(self.weak_freq)
-        tone_layout.addStretch()
-        params_layout.addLayout(tone_layout)
+        # MIDI 音高设置
+        pitch_layout = QHBoxLayout()
+        pitch_layout.addWidget(QLabel("强拍 MIDI 音高:"))
+        self.strong_pitch = QSpinBox()
+        self.strong_pitch.setRange(18, 116)
+        self.strong_pitch.setValue(84)
+        pitch_layout.addWidget(self.strong_pitch)
+
+        pitch_layout.addWidget(QLabel("弱拍 MIDI 音高:"))
+        self.weak_pitch = QSpinBox()
+        self.weak_pitch.setRange(18, 116)
+        self.weak_pitch.setValue(80)
+        pitch_layout.addWidget(self.weak_pitch)
+        pitch_layout.addStretch()
+        params_layout.addLayout(pitch_layout)
+
+        # Swing 设置
+        swing_layout = QHBoxLayout()
+        swing_layout.addWidget(QLabel("摇摆量 (-1 到 1):"))
+        self.swing_spin = QDoubleSpinBox()
+        self.swing_spin.setRange(-1.0, 1.0)
+        self.swing_spin.setValue(0.0)
+        self.swing_spin.setSingleStep(0.1)
+        swing_layout.addWidget(self.swing_spin)
+        swing_layout.addStretch()
+        params_layout.addLayout(swing_layout)
 
         params_group.setLayout(params_layout)
         layout.addWidget(params_group)
@@ -212,8 +257,11 @@ class MetronomeTab(QWidget):
         bpm = self.bpm_spin.value()
         duration = self.duration_spin.value()
         beats_per_measure = self.beats_spin.value()
-        strong_freq = self.strong_freq.value()
-        weak_freq = self.weak_freq.value()
+        click_type_name = self.click_type_combo.currentText()
+        click_type = self.click_type_map[click_type_name]
+        strong_pitch = self.strong_pitch.value()
+        weak_pitch = self.weak_pitch.value()
+        swing = self.swing_spin.value()
 
         project_dir = os.path.dirname(os.path.dirname(__file__))
         metronome_dir = os.path.join(project_dir, "audio_output", "metronome")
@@ -225,19 +273,20 @@ class MetronomeTab(QWidget):
 
         self.metro_worker = WorkerThread(
             self._run_metronome_generation,
-            bpm, duration, beats_per_measure, strong_freq, weak_freq, output_path
+            bpm, duration, beats_per_measure, click_type, strong_pitch, weak_pitch, swing, output_path
         )
         self.metro_worker.finished.connect(self._on_metronome_finished)
         self.metro_worker.start()
 
     @staticmethod
-    def _run_metronome_generation(bpm, duration, beats_per_measure, strong_freq, weak_freq, output_path):
+    def _run_metronome_generation(bpm, duration, beats_per_measure, click_type, strong_pitch, weak_pitch, swing, output_path):
         import sys
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'modules'))
-        from metronome_generator import MetronomeGenerator, MetronomeConfig
+        from metronome_generator import MetronomeGenerator, MetronomeConfig, ClickType
         config = MetronomeConfig(
             bpm=bpm, duration=duration, beats_per_measure=beats_per_measure,
-            strong_freq=strong_freq, weak_freq=weak_freq
+            click_type=ClickType(click_type), strong_pitch=strong_pitch, weak_pitch=weak_pitch,
+            swing=swing
         )
         generator = MetronomeGenerator(config)
         audio, sr = generator.generate(output_path)

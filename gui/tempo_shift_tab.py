@@ -1,7 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-变速处理标签页
+Tab 2 - 变速不变调处理标签页
+
+功能:
+    1. 加载 data/song_bpm_list.json，展示每首歌的原 BPM 和变速后 BPM
+    2. 设置目标 BPM（跑步推荐 160-190）
+    3. 严格模式: 所有歌曲变速到精确目标 BPM
+       非严格模式: 找目标 BPM 的最接近因数（如 180 → 90 / 60），
+       使变速比例最小化，减少音质损失
+    4. 批量处理，输出到 audio_output/shifted_songs/
+    5. 自动加载 file_mapping.json 显示原始文件名
+
+变速比例计算:
+    rate = 目标BPM / 原始BPM
+    例: 原 120BPM → 目标 180BPM → rate = 1.5 (加速 50%)
+
+依赖:
+    modules/tempo_shifter.py → TempoShifter（librosa.effects.time_stretch 相位声码器）
 """
 
 import os

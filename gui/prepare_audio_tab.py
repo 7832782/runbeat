@@ -1,14 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-0. 准备音频标签页
+Tab 0 - 准备音频标签页
 
-功能：
-1. 拖拽导入音频文件到列表
-2. 展示有序音频列表
-3. 支持拖拽排序调整顺序
-4. 支持删除操作
-5. 保存到 audio_input 目录并生成映射
+RunBeat 工作流的第一步，负责将用户选择的音频文件导入到内部工作目录。
+
+功能:
+    1. 拖拽导入: 支持将文件从资源管理器直接拖入列表（过滤非音频文件）
+    2. 文件对话框导入: 点击按钮选择文件（支持多选）
+    3. 列表排序: 内部拖拽调整歌曲顺序（通过 DragDropMode.InternalMove）
+    4. 删除/清空: 支持删除单首或清空全部
+    5. 准备完成: 将列表中的文件按序号复制到 audio_input/（重命名为 1.mp3, 2.mp3...）
+       同时生成 data/file_mapping.json 保存原始文件名映射
+    6. 清理缓存: 清空 audio_input/、metronome/、shifted_songs/、data/（保留 final_mix/）
+
+类:
+    AudioListItem        自定义 QListWidgetItem，存储文件路径和原始名称
+    DroppableListWidget   支持外部拖拽导入和内部拖拽排序的列表组件
+    PrepareAudioTab        标签页主控件
+
+支持音频格式:
+    .mp3 / .wav / .flac / .m4a / .ogg / .aac / .wma
 """
 
 import os
